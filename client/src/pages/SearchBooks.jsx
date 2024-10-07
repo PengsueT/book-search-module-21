@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Container, Col, Form, Button, Card, Row } from 'react-bootstrap';
-
 import Auth from '../utils/auth';
 import { searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
@@ -22,7 +21,7 @@ const SearchBooks = () => {
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
   useEffect(() => {
     return () => saveBookIds(savedBookIds);
-  });
+  }, [savedBookIds]);
 
   // create method to search for books and set state on form submit
   const handleFormSubmit = async (event) => {
@@ -33,26 +32,39 @@ const SearchBooks = () => {
     }
 
     try {
+      // Declare the response properly using 'const'
       const response = await searchGoogleBooks(searchInput);
-
+  
+      // Check if the response is not ok
       if (!response.ok) {
-        throw new Error('something went wrong!');
+        console.error('API responded with a status:', response.status);
+        throw new Error('Error occurred with this search!');
       }
-
+  
+      // Parse the JSON response
       const { items } = await response.json();
-
+  
+      // If 'items' is undefined or empty, handle it
+      if (!items || items.length === 0) {
+        console.warn('No items found for this search term.');
+        throw new Error('No books found with this search term.');
+      }
+  
+      // Map the items to bookData
       const bookData = items.map((book) => ({
         bookId: book.id,
         authors: book.volumeInfo.authors || ['No author to display'],
         title: book.volumeInfo.title,
-        description: book.volumeInfo.description,
+        description: book.volumeInfo.description || 'No description available',
         image: book.volumeInfo.imageLinks?.thumbnail || '',
+        link: book.volumeInfo.infoLink || '',
       }));
-
+  
       setSearchedBooks(bookData);
       setSearchInput('');
     } catch (err) {
-      console.error(err);
+      console.error('Error fetching books: ', err);
+      alert(err.message); // Display the error message in an alert to inform the user
     }
   };
 

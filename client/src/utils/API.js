@@ -8,7 +8,7 @@ export const getMe = (token) => {
   });
 };
 
-export const checkAddUser = (userData) => {
+export const checkaddUser = (userData) => {
   return fetch('/api/users', {
     method: 'POST',
     headers: {
