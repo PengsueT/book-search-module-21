@@ -4,7 +4,7 @@ const { AuthenticationError } = require('apollo-server-express');
 
 const resolvers = {
     Query: {
-    // A resolver for the "me" query.
+        // A resolver for the "me" query.
         me: async (parent, args, context) => {
             if (context.user) {
                 const userData = await User.findById(context.user._id).select('-__v -password');
@@ -28,12 +28,14 @@ const resolvers = {
             const token = signToken(user);
             return { token, user };
         },
+
         // addUser mutation
         addUser: async (parent, { username, email, password }) => {
             const user = await User.create({ username, email, password });
             const token = signToken(user);
             return { token, user };
         },
+
         // saveBook mutation
         saveBook: async (parent, { bookId, authors, description, title, image, link }, context) => {
             if (context.user) {
@@ -46,6 +48,7 @@ const resolvers = {
             }
             throw new AuthenticationError('You need to be logged in!');
         },
+
         // removeBook mutation
         removeBook: async (parent, { bookId }, context) => {
             if (context.user) {
@@ -60,3 +63,5 @@ const resolvers = {
         },
     },
 }
+
+module.exports = resolvers;
